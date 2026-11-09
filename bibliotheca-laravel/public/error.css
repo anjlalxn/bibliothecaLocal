@@ -1,0 +1,130 @@
+:root {
+
+    --color-primary: #0dcaf0;
+    --color-primary-deep: #17707f;
+    --color-teal-darker: #134e5a;
+    --color-navy: #0b262e;
+    --color-offwhite: #fbf6fd;
+    --color-white: #ffffff;
+    --color-text-dark: #212529;
+
+
+    --font-heading: "Momo Trust Display", sans-serif;
+    --font-body: "Figtree", sans-serif;
+
+
+    --space-xs: 0.25rem;
+    --space-sm: 0.5rem;
+    --space-md: 1rem;
+    --space-lg: 1.5rem;
+    --space-xl: 2.5rem;
+    --space-xxl: 3.5rem;
+
+
+    --radius-sm: 6px;
+}
+
+
+
+
+.error-404 {
+    --error-bg: var(--color-primary);
+    --error-title: var(--color-primary-deep);
+    --error-text: var(--color-white);
+    --error-code: var(--color-teal-darker);
+}
+
+.error-500 {
+    --error-bg: var(--color-navy);
+    --error-title: var(--color-primary);
+    --error-text: var(--color-white);
+    --error-code: var(--color-primary);
+}
+
+
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--error-bg);
+    color: var(--error-text);
+}
+
+.error-wrapper {
+    min-height: 100vh;
+    padding: var(--space-xxl) var(--space-lg);
+}
+
+
+.error-icon {
+    font-size: 13rem;
+    line-height: 1;
+    color: var(--color-offwhite);
+}
+
+.error-title {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    font-weight: 600;
+    line-height: 1.1;
+    color: var(--error-title);
+    margin-bottom: var(--space-md);
+}
+
+.error-message {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    max-width: 480px;
+    margin-bottom: var(--space-md);
+}
+
+.error-code {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--error-code);
+    margin-bottom: var(--space-xl);
+}
+
+.btn-back {
+    min-width: 170px;
+    padding: 0.5rem var(--space-lg);
+    background-color: var(--color-white);
+    color: var(--color-text-dark);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: none;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.15s ease;
+}
+
+.btn-back:hover {
+    background-color: rgba(255, 255, 255, 0.85);
+    color: var(--color-text-dark);
+}
+
+
+
+@media (max-width: 991.98px) {
+    .error-icon {
+        font-size: 10rem;
+    }
+
+    .error-title {
+        font-size: 3rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .error-icon {
+        font-size: 7rem;
+    }
+
+    .error-title {
+        font-size: 2.4rem;
+    }
+
+    .error-message {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
