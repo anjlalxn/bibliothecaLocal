@@ -33,13 +33,14 @@ class AuthController extends Controller
 
             return back()
                 ->withErrors(['username' => "Too many login attempts. Please try again in {$seconds} seconds."])
-                ->onlyInput('username');
+                ->onlyInput('username', 'remember');
         }
 
         // Only active accounts can sign in.
         $credentials['status'] = 'Active';
 
-        if (Auth::attempt($credentials)) {
+        // Second argument keeps the user signed in when "Remember me" is checked
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             RateLimiter::clear($throttleKey);
             $request->session()->regenerate();
 
@@ -51,7 +52,7 @@ class AuthController extends Controller
 
         return back()
             ->withErrors(['username' => 'Invalid username or password.'])
-            ->onlyInput('username');
+            ->onlyInput('username', 'remember');
     }
 
     public function logout(Request $request)
