@@ -9,7 +9,7 @@
 
 Bibliotheca is a web-based Library Management System developed using **Laravel**. It provides a centralized platform for managing book records, monitoring book availability, handling borrowing and returns, and viewing library statistics through an administrative dashboard.
 
-> **Local copy (XAMPP version).** This copy is set up to run on a local XAMPP MySQL/MariaDB database. The original project used TiDB Cloud; the data has been exported to `bibliotheca.sql` so no cloud account or credentials are needed.
+> **Local copy (XAMPP version).** This copy is set up to run on a local XAMPP MySQL/MariaDB database. The original project used TiDB Cloud; the data has been exported to `bibliotheca.sql` so no cloud account or credentials are needed. Note that this local copy is intended for professor's evaluation and testing. The manuscript stated the use of a cloud database.
 
 ## Features
 
@@ -54,8 +54,8 @@ Open the XAMPP Control Panel and start **MySQL** (Apache is only needed for phpM
 ### 3. Create the database and import the data
 
 1. Open http://localhost/phpmyadmin
-2. Click **New** and create a database named `bibliotheca` (collation `utf8mb4_unicode_ci`).
-3. Select the `bibliotheca` database, click **Import**, choose `bibliotheca.sql` (included in this zip), and click **Import**.
+2. Click **New** and create a database named `bibliotheca_DB` (collation `utf8mb4_unicode_ci`).
+3. Select the `bibliotheca_DB` database, click **Import**, choose `bibliotheca.sql` (included in this zip), and click **Import**.
 
 The import already contains all tables and the sample book and category records.
 
@@ -90,7 +90,7 @@ APP_URL=http://127.0.0.1:8000
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=bibliotheca
+DB_DATABASE=bibliotheca_DB
 DB_USERNAME=root
 DB_PASSWORD=
 ```
