@@ -8,10 +8,8 @@
     --color-white: #ffffff;
     --color-text-dark: #212529;
 
-
     --font-heading: "Momo Trust Display", sans-serif;
     --font-body: "Figtree", sans-serif;
-
 
     --space-xs: 0.25rem;
     --space-sm: 0.5rem;
@@ -19,7 +17,6 @@
     --space-lg: 1.5rem;
     --space-xl: 2.5rem;
     --space-xxl: 3.5rem;
-
 
     --radius-sm: 6px;
 }
