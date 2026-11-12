@@ -24,12 +24,25 @@ class BorrowingController extends Controller
         $from   = $request->query('from');
         $to     = $request->query('to');
 
+        // One row per transaction: copies borrowed together (same member, book,
+        // borrow date, due date, and returned/not returned) are collapsed.
+        // borrowing_id is the lowest ID in the group, so the "view" link opens
+        // the same page the member page cards open.
         $borrowings = Borrowing::with(['member', 'book'])
+            ->select([
+                DB::raw('MIN(borrowing_id) as borrowing_id'),
+                'member_id',
+                'book_id',
+                DB::raw('MIN(borrowing_date) as borrowing_date'),
+                DB::raw('MIN(due_date) as due_date'),
+                DB::raw('MAX(return_date) as return_date'),
+                DB::raw('COUNT(*) as copies'),
+            ])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->whereHas('member', function ($m) use ($search) {
                         $m->where('full_name', 'like', "%{$search}%")
-                          ->orWhere('member_code', 'like', "%{$search}%");
+                            ->orWhere('member_code', 'like', "%{$search}%");
                     })->orWhereHas('book', function ($b) use ($search) {
                         $b->where('title', 'like', "%{$search}%");
                     });
@@ -37,24 +50,32 @@ class BorrowingController extends Controller
             })
             // same rules the table badges use
             ->when($status === 'borrowed', fn ($q) => $q->whereNull('return_date')
-                                                        ->whereDate('due_date', '>=', today()))
+                ->whereDate('due_date', '>=', today()))
             ->when($status === 'overdue',  fn ($q) => $q->whereNull('return_date')
-                                                        ->whereDate('due_date', '<', today()))
+                ->whereDate('due_date', '<', today()))
             ->when($status === 'returned', fn ($q) => $q->whereNotNull('return_date'))
             ->when($from, fn ($q) => $q->whereDate('borrowing_date', '>=', $from))
             ->when($to,   fn ($q) => $q->whereDate('borrowing_date', '<=', $to))
+            ->groupBy(
+                'member_id',
+                'book_id',
+                DB::raw('DATE(borrowing_date)'),
+                DB::raw('DATE(due_date)'),
+                DB::raw('(return_date IS NOT NULL)')
+            )
             // newest borrowings first
-            ->orderByDesc('borrowing_date')
-            ->orderByDesc('borrowing_id')
+            ->orderByRaw('DATE(borrowing_date) DESC')
+            ->orderByRaw('MIN(borrowing_id) DESC')
             ->paginate(15)
             ->withQueryString();
 
+        // These still count individual copies
         $stats = [
             'active'        => Borrowing::whereNull('return_date')->count(),
             'borrowedToday' => Borrowing::whereDate('borrowing_date', today())->count(),
             'overdue'       => Borrowing::whereNull('return_date')
-                                        ->whereDate('due_date', '<', now())
-                                        ->count(),
+                ->whereDate('due_date', '<', now())
+                ->count(),
             'returnedToday' => Borrowing::whereDate('return_date', today())->count(),
             'available'     => Book::sum('available_quantity'),
         ];
@@ -131,7 +152,35 @@ class BorrowingController extends Controller
     {
         $borrowing->load(['member', 'book.category']);
 
-        return view('borrowing.show', compact('borrowing'));
+        // Every row this member has for this book, grouped into transactions
+        // (same borrow date, due date and status), the same rule the member page uses.
+        $transactions = Borrowing::where('member_id', $borrowing->member_id)
+            ->where('book_id', $borrowing->book_id)
+            ->orderBy('borrowing_date')
+            ->orderBy('borrowing_id')
+            ->get()
+            ->groupBy(fn ($b) =>
+                optional($b->borrowing_date)->toDateString() . '|' .
+                optional($b->due_date)->toDateString() . '|' .
+                $b->display_status
+            )
+            ->map(fn ($group) => (object) [
+                'copies'         => $group->count(),
+                'borrowing_id'   => $group->first()->borrowing_id,
+                'ids'            => $group->pluck('borrowing_id')->all(),
+                'display_status' => $group->first()->display_status,
+                'borrowing_date' => $group->first()->borrowing_date,
+                'due_date'       => $group->first()->due_date,
+            ])
+            ->values();
+
+        // The transaction being viewed
+        $current = $transactions->first(fn ($t) => in_array($borrowing->borrowing_id, $t->ids));
+
+        // The other transactions this member has for the same book
+        $others = $transactions->reject(fn ($t) => $t === $current)->values();
+
+        return view('borrowing.show', compact('borrowing', 'current', 'others'));
     }
 
     public function export(Request $request)
@@ -150,7 +199,7 @@ class BorrowingController extends Controller
             fwrite($out, "\xEF\xBB\xBF"); // so Excel reads UTF-8 correctly
 
             fputcsv($out, ['Transaction ID', 'Member Code', 'Member', 'Book',
-                           'Date Borrowed', 'Due Date', 'Return Date', 'Status']);
+                'Date Borrowed', 'Due Date', 'Return Date', 'Status']);
 
             foreach ($rows as $b) {
                 fputcsv($out, [
