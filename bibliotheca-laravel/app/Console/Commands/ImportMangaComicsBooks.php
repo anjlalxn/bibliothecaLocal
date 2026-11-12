@@ -14,7 +14,6 @@ class ImportMangaComicsBooks extends Command
 
     public function handle()
     {
-        // Open Library subject => [category name saved in your database, how many new books to add]
         $subjects = [
             // Manga and comics
             'manga'              => ['Manga', 20],

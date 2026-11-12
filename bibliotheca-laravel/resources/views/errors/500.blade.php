@@ -35,7 +35,6 @@
                     </p>
                     <p class="error-code">Error code: 500</p>
 
-                    <!-- Laravel: href="{{ url()->previous() }}" -->
                     <a href="javascript:history.back()" class="btn btn-back">Go back</a>
                 </div>
 

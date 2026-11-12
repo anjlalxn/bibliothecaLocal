@@ -22,7 +22,7 @@ Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 
 // Everything below requires a signed-in user,
 // and is never cached by the browser (so Back can't reveal it after logout).
-Route::middleware(['auth', NoCache::class])->group(function () {
+    Route::middleware(['auth', NoCache::class])->group(function () {
 
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
